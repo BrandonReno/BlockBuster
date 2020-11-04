@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy import cov
 import pandas as pd 
 import seaborn as sns
+from scipy.stats import pearsonr
 
 Data = pd.read_csv("CleanedDataRevenue.csv", header = 0)
 
@@ -20,14 +22,23 @@ def plotScatter(x, y):
     plt.ylabel(y)
     plt.title(x + " vs " + y)
     plt.show()
-    #plt.savefig("BlockBusterGraphs/"+ x + "vs" + y +".png")
+    plt.savefig("BlockBusterGraphs/"+ x + "vs" + y +".png")
 
 
-plotScatter("cast","revenue")
+#plotScatter("runtime","revenue")
+
 """
-sns.boxplot(y='revenue', x='release_date', data=Data,palette="colorblind", showfliers = False)
-plt.title("BoxPlot of Release Dates and Revenues")
-plt.xlabel("release date")
-plt.ylabel("revenue")
-plt.savefig("BoxPlotRDvR.png")
+sns.boxplot(y='cast', x='revenue', data=Data,palette="colorblind", showfliers = False)
+plt.title("BoxPlot of Oscars and Revenues")
+plt.xlabel("Revenu")
+plt.ylabel("Oscars")
+plt.savefig("BoxPlotOvR.png")
 """
+
+
+
+covariance = cov(Data["release_year"], Data["revenue"])
+corr = pearsonr(Data["release_year"], Data["revenue"])
+
+with open("CorelationStats", "a") as f:
+    f.write("CORELATION BETWEEN " + "release_year" + " AND REVENUE: COVARIANCE: " + str(covariance) + "PEARSONS: " + str(corr) + "\n")

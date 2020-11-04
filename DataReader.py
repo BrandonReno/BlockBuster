@@ -28,7 +28,7 @@ class DataReader:
         self.MovieDataFrame.drop(["vote_count", "vote_average"], axis = 1, inplace = True)
 
     def formatData(self):
-        self.MovieDataFrame.drop(["id", "genres", "production_companies", "director","tagline", "imdb_id", "original_title", "homepage", "keywords", "overview", "runtime", "budget_adj", "revenue_adj", "release_year"], axis =1, inplace = True)
+        self.MovieDataFrame.drop(["id", "production_companies", "director","tagline", "imdb_id", "original_title", "homepage", "keywords", "overview", "budget_adj", "revenue_adj"], axis =1, inplace = True)
         self.MovieDataFrame.dropna(subset = ["release_date", "cast"], inplace = True) 
         self.formatDates()
         self.formatArrays("cast")
@@ -36,7 +36,7 @@ class DataReader:
         for ind, row in self.MovieDataFrame.iterrows():
             if (int(row["revenue"]) == 0 or int(row["budget"]) == 0):
                 self.MovieDataFrame.drop(ind, inplace= True)
-        self.MovieDataFrame = self.MovieDataFrame[['popularity', 'budget', 'cast', 'release_date', 'voteScore', 'revenue']]
+        self.MovieDataFrame = self.MovieDataFrame[['popularity', 'budget', 'cast', 'release_date', 'voteScore', 'revenue', 'runtime', 'release_year', "genres"]]
         #self.setOutput()
         
 
