@@ -32,6 +32,7 @@ class DataReader:
         self.MovieDataFrame.dropna(subset = ["release_date", "cast"], inplace = True) 
         self.formatDates()
         self.formatArrays("cast")
+        self.formatArrays("genres")
         self.formatVotes()
         for ind, row in self.MovieDataFrame.iterrows():
             if (int(row["revenue"]) == 0 or int(row["budget"]) == 0):
