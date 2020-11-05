@@ -58,8 +58,6 @@ class DataReader:
         return self.MovieDataFrame
         
 
-        
-
     def saveData(self):
         pass
 

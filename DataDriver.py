@@ -13,6 +13,14 @@ class DataDriver:
         self.OutputData = self.Data.getOutput()
         self.cleanOscarData()
 
+    """
+    def scoreGenres(self):
+        for i, j in self.MovieDF.iterrows():
+            GenreArray = [g for g in j["genres"]]
+            for genre in GenreArray:
+                """
+                
+
     def setActorsDict(self):
         for ind, row in self.MovieDF.iterrows():
             for actor in row["cast"]:
@@ -35,8 +43,6 @@ class DataDriver:
             elif row["entity"] in self.ActorsDictionary.keys():
                 val = self.ActorsDictionary[row["entity"]]
                 self.ActorsDictionary[row["entity"]] = val
-        for ind, row in self.ActorsDictionary.items():
-            print(ind, row)
         self.AddScores()
 
     def SearchDict(self, dic, name):
@@ -60,4 +66,5 @@ class DataDriver:
 
 if __name__ == "__main__":
     ActorS = DataDriver("data_csv.csv")
-    ActorS.SaveData()
+    #ActorS.scoreGenres()
+    #ActorS.SaveData()
