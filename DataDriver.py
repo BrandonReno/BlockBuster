@@ -13,13 +13,14 @@ class DataDriver:
         self.OutputData = self.Data.getOutput()
         self.cleanOscarData()
 
-    """
     def scoreGenres(self):
-        for i, j in self.MovieDF.iterrows():
-            GenreArray = [g for g in j["genres"]]
-            for genre in GenreArray:
-                """
-                
+        genreList = ['Action', 'Adventure', 'Science Fiction', 'Thriller', 'Fantasy', 'Crime', 'Western', 'Drama', 'Family', 'Animation', 'Comedy', 'Mystery', 'Romance', 'War', 'History', 'Music', 'Horror', 'Documentary', 'Foreign', 'TV Movie']
+        GenreScore = {k:v for (k,v) in zip(genreList,list(reversed(range(len(genreList) + 1))))}
+        for ind, row in self.MovieDF.iterrows():
+            score = 1
+            for genre in row["genres"]:
+                score *= GenreScore[genre]
+            self.Data.setNewAttribute(ind, "genres", score)
 
     def setActorsDict(self):
         for ind, row in self.MovieDF.iterrows():
@@ -62,9 +63,9 @@ class DataDriver:
             self.MovieDF = self.Data.setNewAttribute(ind, "cast", self.IterateScore(self.ActorsDictionary, row["cast"]))
 
     def SaveData(self):
-        self.MovieDF.to_csv("CleanedDataRevenue.csv", index=False)
+        self.MovieDF.to_csv("NNInput.csv", index=False)
 
 if __name__ == "__main__":
     ActorS = DataDriver("data_csv.csv")
-    #ActorS.scoreGenres()
-    #ActorS.SaveData()
+    ActorS.scoreGenres()
+    ActorS.SaveData()

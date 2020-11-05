@@ -11,27 +11,29 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 
+
+
 # load dataset
-dataframe = pandas.read_csv("CleanedData.csv", header=0)
+dataframe = pandas.read_csv("NNInput.csv", header=0)
 dataset = dataframe.values
 # split into input (X) and output (Y) variables
-X = dataset[:3000,0:5]
-Y = dataset[:3000,5]
 
-XT = dataset[3000:,0:5]
-YT = dataset[3000:,5]
+Inputs = len(dataframe.columns) - 1
 
+
+print(Inputs)
+X = dataset[:3000,0:3]
+Y = dataset[:3000,3]
+
+XT = dataset[3000:,0:3]
+YT = dataset[3000:,3]
 
 callback = EarlyStopping(monitor='mse', patience=3)
 
-def Linear_Regression_Model():
-	pass
-
-
-def Regr_model():
+def Createmodel():
 	# create model
 	model = Sequential()
-	model.add(Dense(20, input_dim=5, kernel_initializer='normal', activation='relu'))
+	model.add(Dense(20, input_dim=3, kernel_initializer='normal', activation='relu'))
 	model.add(Dense(18, activation='relu'))
 	model.add(Dense(12, activation='relu'))
 	model.add(Dense(1, kernel_initializer='normal'))
@@ -39,18 +41,20 @@ def Regr_model():
 	model.compile(loss='mse', optimizer='adam', metrics=['mse'])
 	return model
 
-model = Regr_model()
-model.fit(X, Y, epochs = 200, verbose =2, callbacks=callback)
-print(model.evaluate(X,Y, verbose=0))
+def FitModel():
+	model = Createmodel()
+	history = model.fit(X, Y, epochs=200, verbose=2, callbacks=callback)
+	return history
+
+def plotAccuracy():
+	history = FitModel()
+	plt.plot(history.history['mse'])
+	plt.title("Mean Squared Error Movie Revenue")
+	plt.xlabel("Epochs")
+	plt.ylabel("MSE")
+	plt.show()
 
 
-history = model.fit(X, Y, epochs=200, verbose=2, callbacks=callback)
-
-plt.plot(history.history['mse'])
-plt.title("Mean Squared Error Movie Revenue")
-plt.xlabel("Epochs")
-plt.ylabel("MSE")
-plt.show()
 
 
 

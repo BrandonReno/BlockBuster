@@ -18,3 +18,25 @@ CORELATION BETWEEN release_year AND REVENUE: COVARIANCE: [[1.27315233e+02 2.7730
   OVERALL STATS PEARSON:
  [0.08135903578163287,0.13915709961735256, 0.22777463063716472,.2503374017774749, 0.6154206716269728, 0.6884231492291424, 0.730467673405195]
  [cast, release_year, release_date, runtime popularity, budget, votescore]
+CORELATION BETWEEN release_year AND REVENUE: COVARIANCE: [[1.27315233e+02 2.77305893e+08]
+ [2.77305893e+08 3.11908414e+16]]PEARSONS: (0.13915709961735256, 4.175685876690884e-18)
+
+
+ RevenueQuartiles:
+
+[13612065.75, 44834485.0, 124296916.75]
+
+ IQR:
+ 31222419.25, 79462431.75
+
+ Bust, Average, Blockbuster
+
+ < 13612065 = Bust
+ 13612065 < x < 44834485 = average - 1
+ 44834485 < x < 124296916.75 = average + 1
+ > 124296916.75 = BlockBuster
+
+Genres listed based on total mean revenue
+ 'Action', 'Adventure', 'Science Fiction', 'Thriller', 'Fantasy', 'Crime', 'Western', 'Drama', 'Family', 'Animation', 'Comedy', 'Mystery', 'Romance', 'War', 'History', 'Music', 'Horror', 'Documentary', 'Foreign', 'TV Movie'
+Revmeans for Genres
+156433869, 218291850, 163619730, 97741254, 218234134, 84015521, 87412920, 74369825, 203153546, 257121500, 97349488, 91045775, 85748008, 106032069.99159664, 81405236, 83896935, 57287803, 24333724, 11115957, 42000000

@@ -8,6 +8,18 @@ class DataReader:
         self.weightsArray = []
         self.Output = []
 
+    def classifyRevenue(self):
+        for ind, row in self.MovieDataFrame.iterrows():
+            rev = float(row["revenue"])
+            if rev < 13612065.75:
+                self.setNewAttribute(ind, "revenue", "Bust")
+            elif rev > 13612065.75 and rev < 44834485.00:
+                self.setNewAttribute(ind, "revenue", "Below Average")
+            elif rev > 44834485.00 and rev < 124296916.75:
+                self.setNewAttribute(ind, "revenue", "Above Average")
+            else:
+                self.setNewAttribute(ind, "revenue", "Blockbuster")
+
     def formatArrays(self, phrase):
         for ind, row in self.MovieDataFrame.iterrows():
             arr = [c for c in str(row[phrase]).split("|")]
@@ -26,29 +38,27 @@ class DataReader:
         for ind, row in self.MovieDataFrame.iterrows():
             self.setNewAttribute(ind, "voteScore", (int(row["vote_count"]) * int(row["vote_average"])))
         self.MovieDataFrame.drop(["vote_count", "vote_average"], axis = 1, inplace = True)
-
-    def formatData(self):
+    
+    def removeNA(self):
         self.MovieDataFrame.drop(["id", "production_companies", "director","tagline", "imdb_id", "original_title", "homepage", "keywords", "overview", "budget_adj", "revenue_adj"], axis =1, inplace = True)
         self.MovieDataFrame.dropna(subset = ["release_date", "cast"], inplace = True) 
+        for ind, row in self.MovieDataFrame.iterrows():
+            if (int(row["revenue"]) == 0 or int(row["budget"]) == 0):
+                self.MovieDataFrame.drop(ind, inplace= True)
+
+    def formatData(self):
+        self.removeNA()
         self.formatDates()
         self.formatArrays("cast")
         self.formatArrays("genres")
         self.formatVotes()
-        for ind, row in self.MovieDataFrame.iterrows():
-            if (int(row["revenue"]) == 0 or int(row["budget"]) == 0):
-                self.MovieDataFrame.drop(ind, inplace= True)
-        self.MovieDataFrame = self.MovieDataFrame[['popularity', 'budget', 'cast', 'release_date', 'voteScore', 'revenue', 'runtime', 'release_year', "genres"]]
-        #self.setOutput()
+        self.classifyRevenue()
+        self.MovieDataFrame = self.MovieDataFrame[['popularity', 'budget', 'cast', 'release_date', 'voteScore', 'runtime', 'release_year', "genres", 'revenue']]
         
 
     def setNewAttribute(self, index, col, value):
         self.MovieDataFrame.at[index, col] = value
         return self.getMovieDF()
-
-    def setOutput(self):
-        for ind, row in self.MovieDataFrame.iterrows():
-            Length = len([i for i in row["revenue"]])
-            self.setNewAttribute(ind, "revenue", Length)
 
     def getOutput(self):
         return self.Output
