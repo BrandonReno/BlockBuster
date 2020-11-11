@@ -1,58 +1,101 @@
-import pandas
+import pandas as pd
+import numpy as np
+import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.callbacks import EarlyStopping
-from tensorflow.keras.utils import normalize
 from tensorflow.keras.layers import Dense
-from tensorflow.keras.optimizers import SGD
-from tensorflow.keras.wrappers.scikit_learn import KerasRegressor
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC 
+from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn import metrics
 import matplotlib.pyplot as plt
+import seaborn as sns
+import os
 
-
+#This makes Tensorflow run on my CPU instead of GPU: Gpu is very laggy because of no batch size
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 # load dataset
-dataframe = pandas.read_csv("NNInput.csv", header=0)
+dataframe = pd.read_csv("NNInput.csv", header=0)
 dataset = dataframe.values
-# split into input (X) and output (Y) variables
 
-Inputs = len(dataframe.columns) - 1
+Cutoff = 3300
 
+#Training Features and Labels
+TrainingInput = dataset[:Cutoff,0:8]
+TrainingOutput = dataset[:Cutoff,8:]
 
-print(Inputs)
-X = dataset[:3000,0:3]
-Y = dataset[:3000,3]
+#Testing Features and Labels
+TestingInput = dataset[Cutoff:,0:8]
+TestingOutput = dataset[Cutoff:,8:]
 
-XT = dataset[3000:,0:3]
-YT = dataset[3000:,3]
+#For NN
+callback = EarlyStopping(monitor='accuracy', patience=30)
 
-callback = EarlyStopping(monitor='mse', patience=3)
-
-def Createmodel():
+def CreateNNmodel():
 	# create model
 	model = Sequential()
-	model.add(Dense(20, input_dim=3, kernel_initializer='normal', activation='relu'))
-	model.add(Dense(18, activation='relu'))
-	model.add(Dense(12, activation='relu'))
-	model.add(Dense(1, kernel_initializer='normal'))
+	model.add(Dense(20, input_dim=8, activation='relu'))
+	model.add(Dense(4, activation = 'softmax'))
 	# Compile model
-	model.compile(loss='mse', optimizer='adam', metrics=['mse'])
+	opt = tf.keras.optimizers.Adam(learning_rate=0.001)
+	model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 	return model
 
-def FitModel():
-	model = Createmodel()
-	history = model.fit(X, Y, epochs=200, verbose=2, callbacks=callback)
-	return history
+def TestRandomForest():
+	RFClassifier = RandomForestClassifier(n_estimators=500)
+	RFClassifier.fit(TrainingInput, TrainingOutput)
+	Prediction = RFClassifier.predict(TestingInput)
+	print(accuracy_score(TestingOutput, Prediction))
+	cm = confusion_matrix(TestingOutput.argmax(axis=1), Prediction.argmax(axis=1)) 
+	return cm
 
-def plotAccuracy():
-	history = FitModel()
-	plt.plot(history.history['mse'])
-	plt.title("Mean Squared Error Movie Revenue")
-	plt.xlabel("Epochs")
-	plt.ylabel("MSE")
+def TestKNN():
+	KnnClassifier = KNeighborsClassifier(n_neighbors = 3).fit(TrainingInput, TrainingOutput)  
+	Predictions = KnnClassifier.predict(TestingInput)  
+	acc = KnnClassifier.score(TestingInput, TestingOutput)
+	cm = confusion_matrix(TestingOutput.argmax(axis=1), Predictions.argmax(axis=1)) 
+	return cm
+	
+
+def TestSVM():
+	SVMClassifier = SVC(kernel = 'linear', C = 1).fit(TrainingInput, TrainingOutput) 
+	Predicitons = SVMClassifier.predict(TestingInput) 
+	accuracy = SVMClassifier.score(TestingInput, TestingOutput) 
+
+	print(accuracy)
+
+def TestNNModel():
+	model = CreateNNmodel()
+	model.fit(TrainingInput, TrainingOutput, epochs=1000, verbose=0,callbacks=callback, validation_split=.25)
+	acc = model.evaluate(TestingInput,TestingOutput)
+	print(acc[1])
+	results = np.argmax(model.predict(TestingInput), axis=1)
+	cm = confusion_matrix(TestingOutput.argmax(axis=1), results) 
+	return cm
+
+def withinOne():
+	pass
+
+
+
+def ConfusionMatrix(cm):
+	categories = [ 'Above Average','Below Average','Blockbuster', 'Bust',]
+	df_cm = pd.DataFrame(cm, index = categories, columns = categories)
+	plt.figure(figsize = (10,7))
+	sns.heatmap(df_cm, annot=True, cmap = 'Blues')
 	plt.show()
+
+#TestSVM()
+
+ConfusionMatrix(TestNNModel())
+
+#NN Testing
+
+#TestRandomForest()
+
+#TestNNModel
 
 
 
