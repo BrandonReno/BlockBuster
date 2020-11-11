@@ -61,11 +61,18 @@ class DataDriver:
     def AddScores(self):
         for ind, row in self.MovieDF.iterrows():
             self.MovieDF = self.Data.setNewAttribute(ind, "cast", self.IterateScore(self.ActorsDictionary, row["cast"]))
+    
+    def setRevOutput(self):
+        df1 = pd.get_dummies(self.MovieDF["revenue"])
+        self.MovieDF = pd.concat([self.MovieDF, df1], axis = 1)
+        self.MovieDF.drop(["revenue"], axis = 1, inplace = True)
+
 
     def SaveData(self):
-        self.MovieDF.to_csv("NNInput.csv", index=False)
+        self.MovieDF.to_csv("NNTest.csv", index=False)
 
 if __name__ == "__main__":
     ActorS = DataDriver("data_csv.csv")
     ActorS.scoreGenres()
+    ActorS.setRevOutput()
     ActorS.SaveData()

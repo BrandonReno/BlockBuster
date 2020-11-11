@@ -8,10 +8,21 @@ from scipy.stats import pearsonr
 Data = pd.read_csv("NNInput.csv", header = 0)
 
 
-Percentiles = np.percentile(sorted(Data.revenue), [25,50,75])
+labels = 'Above Average', 'Below Average', 'BlockBuster', 'Bust'
+sizes = [sum(Data["Above Average"])/len(Data), sum(Data["Below Average"])/len(Data), sum(Data["Blockbuster"])/len(Data), sum(Data["Bust"])/len(Data)]
+explode = (0.1, 0.1, 0.1, 0.1)
+
+fig1, ax1 = plt.subplots()
+ax1.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%',
+        shadow=True, startangle=90)
+ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+plt.show()
+
+""" Percentiles = np.percentile(sorted(Data.revenue), [25,50,75])
 Percentiles = [float('{:f}'.format(i)) for i in Percentiles]
 print(Percentiles)
-print(Percentiles[1] - Percentiles[0], Percentiles[2] - Percentiles[1])
+print(Percentiles[1] - Percentiles[0], Percentiles[2] - Percentiles[1]) """
 
       
 #Data.boxplot(column=["revenue"])

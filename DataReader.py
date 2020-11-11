@@ -13,10 +13,8 @@ class DataReader:
             rev = float(row["revenue"])
             if rev < 13612065.75:
                 self.setNewAttribute(ind, "revenue", "Bust")
-            elif rev > 13612065.75 and rev < 44834485.00:
-                self.setNewAttribute(ind, "revenue", "Below Average")
-            elif rev > 44834485.00 and rev < 124296916.75:
-                self.setNewAttribute(ind, "revenue", "Above Average")
+            elif rev > 13612065.75 and rev < 124296916.75:
+                self.setNewAttribute(ind, "revenue", "Average")
             else:
                 self.setNewAttribute(ind, "revenue", "Blockbuster")
 
