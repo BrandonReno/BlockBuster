@@ -78,8 +78,6 @@ def TestNNModel():
 def withinOne():
 	pass
 
-
-
 def ConfusionMatrix(cm):
 	categories = [ 'Above Average','Below Average','Blockbuster', 'Bust',]
 	df_cm = pd.DataFrame(cm, index = categories, columns = categories)
@@ -89,7 +87,7 @@ def ConfusionMatrix(cm):
 
 #TestSVM()
 
-ConfusionMatrix(TestNNModel())
+#ConfusionMatrix(TestNNModel())
 
 #NN Testing
 
