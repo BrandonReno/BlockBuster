@@ -47,13 +47,14 @@ def TestRandomForest():
 	RFClassifier = RandomForestClassifier(n_estimators=500)
 	RFClassifier.fit(TrainingInput, TrainingOutput)
 	Prediction = RFClassifier.predict(TestingInput)
-	print(accuracy_score(TestingOutput, Prediction))
+	print("Random Forest Within One Accuracy: ",withinOne(np.argmax(RFClassifier.predict(TestingInput), axis=1), TestingOutput.argmax(axis=1)))
 	cm = confusion_matrix(TestingOutput.argmax(axis=1), Prediction.argmax(axis=1)) 
 	return cm
 
 def TestKNN():
 	KnnClassifier = KNeighborsClassifier(n_neighbors = 3).fit(TrainingInput, TrainingOutput)  
 	Predictions = KnnClassifier.predict(TestingInput)  
+	print("KNN Within One Accuracy: ", withinOne(np.argmax(KnnClassifier.predict(TestingInput), axis=1), TestingOutput.argmax(axis=1)))
 	acc = KnnClassifier.score(TestingInput, TestingOutput)
 	cm = confusion_matrix(TestingOutput.argmax(axis=1), Predictions.argmax(axis=1)) 
 	return cm
@@ -70,13 +71,23 @@ def TestNNModel():
 	model = CreateNNmodel()
 	model.fit(TrainingInput, TrainingOutput, epochs=1000, verbose=0,callbacks=callback, validation_split=.25)
 	acc = model.evaluate(TestingInput,TestingOutput)
-	print(acc[1])
 	results = np.argmax(model.predict(TestingInput), axis=1)
+	print("NN Within One Accuracy:" ,withinOne(np.argmax(model.predict(TestingInput), axis=1), TestingOutput.argmax(axis=1)))
 	cm = confusion_matrix(TestingOutput.argmax(axis=1), results) 
 	return cm
 
-def withinOne():
-	pass
+def withinOne(prediction, actual):
+	acc = 0
+	total = 0
+	for p, a in zip(prediction,actual):
+		if (p + 1 == a or p - 1 == a or p == a):
+			acc +=1
+			total +=1
+		else:
+			total +=1
+	return acc/total
+
+
 
 def ConfusionMatrix(cm):
 	categories = [ 'Above Average','Below Average','Blockbuster', 'Bust',]
@@ -85,15 +96,13 @@ def ConfusionMatrix(cm):
 	sns.heatmap(df_cm, annot=True, cmap = 'Blues')
 	plt.show()
 
-#TestSVM()
 
-#ConfusionMatrix(TestNNModel())
+def TestModels():
+	ConfusionMatrix(TestKNN())
+	ConfusionMatrix(TestRandomForest())
+	ConfusionMatrix(TestNNModel())
 
-#NN Testing
-
-#TestRandomForest()
-
-#TestNNModel
+TestModels()
 
 
 
