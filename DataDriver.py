@@ -69,7 +69,7 @@ class DataDriver:
 
 
     def SaveData(self):
-        self.MovieDF.to_csv("NNTest.csv", index=False)
+        self.MovieDF.to_csv("DataRevExploration.csv", index=False)
 
 if __name__ == "__main__":
     ActorS = DataDriver("data_csv.csv")

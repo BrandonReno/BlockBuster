@@ -64,16 +64,6 @@ class DataReader:
 
     def getMovieDF(self):
         return self.MovieDataFrame
-        
-
-    def saveData(self):
-        pass
-
-    def getWeights(self):
-        pass
-
-    def setWeights(self):
-        pass
 
 
 

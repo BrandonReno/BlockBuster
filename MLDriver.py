@@ -6,12 +6,21 @@ from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.layers import Dense
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import SVC 
 from sklearn.metrics import confusion_matrix, accuracy_score
-from sklearn import metrics
+from statistics import mean
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+
+#These will hold accuracies for plotting after the tests
+NNAccuracies = []
+NNWOAccuracies = []
+
+KnnAccuracies = []
+KnnWOAccuracies = []
+
+RFAccuracies = []
+RFWOAccuracies = []
 
 #This makes Tensorflow run on my CPU instead of GPU: Gpu is very laggy because of no batch size
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
@@ -47,32 +56,31 @@ def TestRandomForest():
 	RFClassifier = RandomForestClassifier(n_estimators=500)
 	RFClassifier.fit(TrainingInput, TrainingOutput)
 	Prediction = RFClassifier.predict(TestingInput)
-	print("Random Forest Within One Accuracy: ",withinOne(np.argmax(RFClassifier.predict(TestingInput), axis=1), TestingOutput.argmax(axis=1)))
+	acc = accuracy_score(TestingOutput, Prediction)
+	WOacc = withinOne(np.argmax(RFClassifier.predict(TestingInput), axis=1), TestingOutput.argmax(axis=1))
+	RFAccuracies.append(acc)
+	RFWOAccuracies.append(WOacc)
 	cm = confusion_matrix(TestingOutput.argmax(axis=1), Prediction.argmax(axis=1)) 
 	return cm
 
 def TestKNN():
 	KnnClassifier = KNeighborsClassifier(n_neighbors = 3).fit(TrainingInput, TrainingOutput)  
 	Predictions = KnnClassifier.predict(TestingInput)  
-	print("KNN Within One Accuracy: ", withinOne(np.argmax(KnnClassifier.predict(TestingInput), axis=1), TestingOutput.argmax(axis=1)))
+	WOacc = withinOne(np.argmax(KnnClassifier.predict(TestingInput), axis=1), TestingOutput.argmax(axis=1))
 	acc = KnnClassifier.score(TestingInput, TestingOutput)
+	KnnAccuracies.append(acc)
+	KnnWOAccuracies.append(WOacc)
 	cm = confusion_matrix(TestingOutput.argmax(axis=1), Predictions.argmax(axis=1)) 
 	return cm
 	
-
-def TestSVM():
-	SVMClassifier = SVC(kernel = 'linear', C = 1).fit(TrainingInput, TrainingOutput) 
-	Predicitons = SVMClassifier.predict(TestingInput) 
-	accuracy = SVMClassifier.score(TestingInput, TestingOutput) 
-
-	print(accuracy)
-
 def TestNNModel():
 	model = CreateNNmodel()
 	model.fit(TrainingInput, TrainingOutput, epochs=1000, verbose=0,callbacks=callback, validation_split=.25)
 	acc = model.evaluate(TestingInput,TestingOutput)
+	WOacc = withinOne(np.argmax(model.predict(TestingInput), axis=1), TestingOutput.argmax(axis=1))
+	NNAccuracies.append(acc[1])
+	NNWOAccuracies.append(WOacc)
 	results = np.argmax(model.predict(TestingInput), axis=1)
-	print("NN Within One Accuracy:" ,withinOne(np.argmax(model.predict(TestingInput), axis=1), TestingOutput.argmax(axis=1)))
 	cm = confusion_matrix(TestingOutput.argmax(axis=1), results) 
 	return cm
 
@@ -87,20 +95,26 @@ def withinOne(prediction, actual):
 			total +=1
 	return acc/total
 
-
-
-def ConfusionMatrix(cm):
+def ConfusionMatrix(cm, title):
 	categories = [ 'Above Average','Below Average','Blockbuster', 'Bust',]
 	df_cm = pd.DataFrame(cm, index = categories, columns = categories)
 	plt.figure(figsize = (10,7))
+	plt.title(title)
 	sns.heatmap(df_cm, annot=True, cmap = 'Blues')
 	plt.show()
 
 
 def TestModels():
-	ConfusionMatrix(TestKNN())
-	ConfusionMatrix(TestRandomForest())
-	ConfusionMatrix(TestNNModel())
+		ConfusionMatrix(TestKNN(), "Knn Confusion Matrix")
+		ConfusionMatrix(TestRandomForest(), "Random Forest Confusion Matrix")
+		ConfusionMatrix(TestNNModel(), "Neural Network Confusion Matrix")
+
+		""" print(mean(NNWOAccuracies))
+		print(mean(NNAccuracies))
+		print(mean(RFWOAccuracies))
+		print(mean(RFAccuracies))
+		print(mean(KnnAccuracies))
+		print(mean(KnnWOAccuracies)) """
 
 TestModels()
 
