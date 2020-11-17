@@ -75,8 +75,9 @@ def TestKNN():
 	
 def TestNNModel():
 	model = CreateNNmodel()
-	model.fit(TrainingInput, TrainingOutput, epochs=1000, verbose=0,callbacks=callback, validation_split=.25)
+	model.fit(TrainingInput, TrainingOutput, epochs=500, verbose=0, validation_split=.25)
 	acc = model.evaluate(TestingInput,TestingOutput)
+	print(acc)
 	WOacc = withinOne(np.argmax(model.predict(TestingInput), axis=1), TestingOutput.argmax(axis=1))
 	NNAccuracies.append(acc[1])
 	NNWOAccuracies.append(WOacc)
