@@ -5,12 +5,18 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.layers import Dense
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score
 from statistics import mean
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+
+#This makes Tensorflow run on my CPU instead of GPU: Gpu is very laggy because of no batch size
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 #These will hold accuracies for plotting after the tests
 NNAccuracies = []
@@ -22,22 +28,28 @@ KnnWOAccuracies = []
 RFAccuracies = []
 RFWOAccuracies = []
 
-#This makes Tensorflow run on my CPU instead of GPU: Gpu is very laggy because of no batch size
-os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+
 
 # load dataset
-dataframe = pd.read_csv("NNInput.csv", header=0)
+dataframe = pd.read_csv("NNInputTest3.csv", header=0)
 dataset = dataframe.values
 
-Cutoff = 3300
+#Preprocess the data with normalization since distribution is not gaussian and ranges are far different
+scaler = MinMaxScaler() 
+dataset = scaler.fit_transform(dataset)
+
+#Cutoff is used to specify the amount of data that will be used for training
+Cutoff = int(len(dataset)*.9)
+Features = 3
+
 
 #Training Features and Labels
-TrainingInput = dataset[:Cutoff,0:8]
-TrainingOutput = dataset[:Cutoff,8:]
+TrainingInput = dataset[:Cutoff,0:Features]
+TrainingOutput = dataset[:Cutoff,Features:]
 
 #Testing Features and Labels
-TestingInput = dataset[Cutoff:,0:8]
-TestingOutput = dataset[Cutoff:,8:]
+TestingInput = dataset[Cutoff:,0:Features]
+TestingOutput = dataset[Cutoff:,Features:]
 
 #For NN
 callback = EarlyStopping(monitor='accuracy', patience=30)
@@ -45,7 +57,9 @@ callback = EarlyStopping(monitor='accuracy', patience=30)
 def CreateNNmodel():
 	# create model
 	model = Sequential()
-	model.add(Dense(20, input_dim=8, activation='relu'))
+	model.add(Dense(10, input_dim=Features, activation='relu'))
+	model.add(Dense(12, activation= 'relu'))
+	model.add(Dense(14, activation= 'relu'))
 	model.add(Dense(4, activation = 'softmax'))
 	# Compile model
 	opt = tf.keras.optimizers.Adam(learning_rate=0.001)
@@ -53,11 +67,12 @@ def CreateNNmodel():
 	return model
 
 def TestRandomForest():
-	RFClassifier = RandomForestClassifier(n_estimators=500)
+	RFClassifier = RandomForestClassifier(n_estimators=200)
 	RFClassifier.fit(TrainingInput, TrainingOutput)
 	Prediction = RFClassifier.predict(TestingInput)
 	acc = accuracy_score(TestingOutput, Prediction)
 	WOacc = withinOne(np.argmax(RFClassifier.predict(TestingInput), axis=1), TestingOutput.argmax(axis=1))
+	print("RF Accuracy: ", acc, "Within One: ", WOacc)
 	RFAccuracies.append(acc)
 	RFWOAccuracies.append(WOacc)
 	cm = confusion_matrix(TestingOutput.argmax(axis=1), Prediction.argmax(axis=1)) 
@@ -68,6 +83,7 @@ def TestKNN():
 	Predictions = KnnClassifier.predict(TestingInput)  
 	WOacc = withinOne(np.argmax(KnnClassifier.predict(TestingInput), axis=1), TestingOutput.argmax(axis=1))
 	acc = KnnClassifier.score(TestingInput, TestingOutput)
+	print("KNN Accuracy: ", acc, "Within One: ", WOacc)
 	KnnAccuracies.append(acc)
 	KnnWOAccuracies.append(WOacc)
 	cm = confusion_matrix(TestingOutput.argmax(axis=1), Predictions.argmax(axis=1)) 
@@ -75,10 +91,13 @@ def TestKNN():
 	
 def TestNNModel():
 	model = CreateNNmodel()
-	model.fit(TrainingInput, TrainingOutput, epochs=500, verbose=0, validation_split=.25)
+	#cv = KFold(n_splits=10, random_state=1, shuffle=True)
+	model.fit(TrainingInput, TrainingOutput, epochs=600, verbose=0)
+	""" scores = cross_val_score(model, TrainingInput, TrainingOutput, scoring='accuracy', cv=cv, n_jobs=-1)
+	print('Accuracy: %.3f (%.3f)' % (mean(scores))) """
 	acc = model.evaluate(TestingInput,TestingOutput)
-	print(acc)
 	WOacc = withinOne(np.argmax(model.predict(TestingInput), axis=1), TestingOutput.argmax(axis=1))
+	print("NN Accuracy: ", acc[1], "Within One: ", WOacc)
 	NNAccuracies.append(acc[1])
 	NNWOAccuracies.append(WOacc)
 	results = np.argmax(model.predict(TestingInput), axis=1)
@@ -91,9 +110,7 @@ def withinOne(prediction, actual):
 	for p, a in zip(prediction,actual):
 		if (p + 1 == a or p - 1 == a or p == a):
 			acc +=1
-			total +=1
-		else:
-			total +=1
+		total +=1
 	return acc/total
 
 def ConfusionMatrix(cm, title):
@@ -109,13 +126,6 @@ def TestModels():
 		ConfusionMatrix(TestKNN(), "Knn Confusion Matrix")
 		ConfusionMatrix(TestRandomForest(), "Random Forest Confusion Matrix")
 		ConfusionMatrix(TestNNModel(), "Neural Network Confusion Matrix")
-
-		""" print(mean(NNWOAccuracies))
-		print(mean(NNAccuracies))
-		print(mean(RFWOAccuracies))
-		print(mean(RFAccuracies))
-		print(mean(KnnAccuracies))
-		print(mean(KnnWOAccuracies)) """
 
 TestModels()
 
