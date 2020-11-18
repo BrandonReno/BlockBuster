@@ -3,11 +3,30 @@ import numpy as np
 from numpy import cov
 import pandas as pd 
 import seaborn as sns
+from pylab import rcParams
+from pandas.plotting import scatter_matrix
+from sklearn.preprocessing import MinMaxScaler
 import statistics
 from scipy.stats import pearsonr
 
-Data = pd.read_csv("DataRevExploration.csv", header = 0)
+Data = pd.read_csv("NNInputFull.csv", header = 0)
 
+
+
+def plot_correlation(data):
+    '''
+    plot correlation's matrix to explore dependency between features 
+    '''
+    # init figure size
+    fig = plt.figure()
+    sns.heatmap(data.corr(), annot=True, fmt=".2f")
+    plt.yticks(rotation=0)
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+    plt.show()
+    fig.savefig('corr.png')
+
+#plot_correlation(Data)
 
 def plotScatter(x, y):
     m, b = np.polyfit(Data[x], Data[y], 1)
