@@ -61,7 +61,6 @@ def CreateNNmodel(hp):
 	#Function to create a neural network, set to be tuned with Hyperparameters
 	model = Sequential()
 
-
 	model.add(Dense(hp.Int("input_units", 8, 40, 2), input_dim=Features, activation=hp.Choice(
         'dense_activation',
         values=['relu', 'tanh', 'sigmoid'],default='relu'), kernel_initializer='he_normal'))
@@ -141,7 +140,7 @@ def TestModels():
 	#Function that outputs confusion matrix of each of the algorithims tested
 		ConfusionMatrix(TestKNN(), "Knn Confusion Matrix")
 		ConfusionMatrix(TestRandomForest(), "Random Forest Confusion Matrix")
-		ConfusionMatrix(TestNNModel(), "Neural Network Confusion Matrix")
+		#ConfusionMatrix(TestNNModel(), "Neural Network Confusion Matrix")
 
 def TuneNetwork():
 	#Function to tune hyperparameters for the neural network
@@ -152,11 +151,12 @@ def TuneNetwork():
 		executions_per_trial=7,
 		directory=os.path.normpath('C:/')
 	)
-
 	tuner.search(x=TrainingInput,y=TrainingOutput, validation_data= (TestingInput, TestingOutput),epochs = 50, batch_size = Features)
 	best_model = tuner.get_best_models(num_models=1)[0]
 	loss, accuracy = best_model.evaluate(TestingInput, TestingOutput)
 	print(accuracy)
+
+#TestModels()
 
 
 
